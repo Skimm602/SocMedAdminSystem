@@ -132,7 +132,6 @@ body::before{
 .btn-primary:active{transform:translateY(0)}
 .btn-sm{padding:5px 10px;font-size:11.5px}
 
-.countdown{font-size:11px;font-family:var(--mono);color:var(--dim);padding:4px 8px;background:var(--glass);border:1px solid var(--border);border-radius:var(--rs)}
 
 /* ── SCROLLABLE CONTENT ───────────────────── */
 .content{flex:1;overflow-y:auto;padding:18px 24px;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,0.08) transparent}
@@ -269,6 +268,35 @@ tbody tr{animation:rfi 0.25s ease both}
 .estate strong{display:block;font-size:13px;color:var(--text);font-weight:600}
 .estate .errmsg{font-family:var(--mono);font-size:10.5px;color:var(--primary);margin-top:6px;word-break:break-all}
 
+/* ── MODAL ───────────────────────────────── */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,0.65);backdrop-filter:blur(6px);z-index:100;display:flex;align-items:center;justify-content:center;padding:16px;opacity:0;pointer-events:none;transition:opacity var(--t)}
+.overlay.open{opacity:1;pointer-events:all}
+.modal{background:rgba(13,13,34,0.97);border:1px solid var(--border-s);border-radius:var(--r);width:100%;max-width:580px;max-height:90vh;display:flex;flex-direction:column;box-shadow:0 24px 64px rgba(0,0,0,0.6),0 0 0 1px rgba(225,29,72,0.12);transform:translateY(20px) scale(0.98);transition:transform var(--t);overflow:hidden}
+.overlay.open .modal{transform:translateY(0) scale(1)}
+.modal-hdr{display:flex;align-items:center;justify-content:space-between;padding:18px 20px;border-bottom:1px solid var(--border);flex-shrink:0}
+.modal-title{font-size:14px;font-weight:700;display:flex;align-items:center;gap:8px}
+.modal-title svg{width:15px;height:15px;stroke:var(--primary);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.modal-close{width:28px;height:28px;border-radius:6px;border:1px solid var(--border);background:var(--glass);color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all var(--t)}
+.modal-close:hover{background:var(--glass-h);color:var(--text);border-color:var(--border-s)}
+.modal-close svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.modal-body{overflow-y:auto;padding:20px;flex:1;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,0.08) transparent}
+.modal-foot{display:flex;align-items:center;justify-content:flex-end;gap:8px;padding:14px 20px;border-top:1px solid var(--border);flex-shrink:0}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.form-field{display:flex;flex-direction:column;gap:5px}
+.form-field.full{grid-column:1/-1}
+.form-label{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em}
+.form-input,.form-select,.form-textarea{
+  background:rgba(0,0,0,0.35);border:1px solid var(--border);border-radius:var(--rs);
+  color:var(--text);font-size:13px;font-family:var(--font);padding:8px 11px;
+  transition:border-color var(--t);outline:none;width:100%;
+}
+.form-input:focus,.form-select:focus,.form-textarea:focus{border-color:rgba(225,29,72,0.5);box-shadow:0 0 0 2px rgba(225,29,72,0.1)}
+.form-input::placeholder,.form-textarea::placeholder{color:var(--dim)}
+.form-select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238888aa' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:30px;cursor:pointer}
+.form-select option{background:#0d0d22;color:var(--text)}
+.form-textarea{resize:vertical;min-height:70px;line-height:1.5}
+input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(0.6);cursor:pointer}
+
 /* ── SPIN ────────────────────────────────── */
 .spin{animation:spin 0.9s linear infinite}
 @keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
@@ -333,8 +361,7 @@ tbody tr{animation:rfi 0.25s ease both}
       <div class="hdr-sub" id="sheetTitle">Connecting to Google Sheets...</div>
     </div>
     <div class="hdr-r">
-      <div class="countdown">Refresh in <span id="cdNum">30</span>s</div>
-      <button class="btn btn-ghost btn-sm" onclick="loadData()">
+<button class="btn btn-ghost btn-sm" onclick="loadData()">
         <svg id="rIcon" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
         Refresh
       </button>
@@ -377,6 +404,10 @@ tbody tr{animation:rfi 0.25s ease both}
               <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
               <input type="text" id="searchInput" placeholder="Search posts..." oninput="filterTable()">
             </div>
+            <button class="btn btn-primary btn-sm" onclick="openAddModal()">
+              <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Add Post
+            </button>
           </div>
         </div>
         <div class="twrap" id="tableWrap">
@@ -431,12 +462,39 @@ tbody tr{animation:rfi 0.25s ease both}
 </main>
 </div><!-- /app -->
 
+<!-- ════════════════ ADD POST MODAL ════════════════ -->
+<div class="overlay" id="addOverlay" onclick="handleOverlayClick(event)">
+  <div class="modal">
+    <div class="modal-hdr">
+      <div class="modal-title">
+        <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Add New Post
+      </div>
+      <button class="modal-close" onclick="closeAddModal()">
+        <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid" id="formFields">
+        <!-- dynamically generated -->
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeAddModal()">Cancel</button>
+      <button class="btn btn-primary" id="submitBtn" onclick="submitPost()">
+        <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+        Save Post
+      </button>
+    </div>
+  </div>
+</div>
+
 <script>
 // ═══════════════════════════════════════════════
 // STATE
 // ═══════════════════════════════════════════════
 var headers = [], rows = [], filtered = [], curPage = 1, PAGE = 20;
-var cdVal = 30, cdTimer = null;
+var currentSheet = '';
 var SHEET_URL = 'https://docs.google.com/spreadsheets/d/15obwGmVNG5R6gxDQGmqTx2p2tiEoSiPWhe02EeCDctI/edit';
 
 // ═══════════════════════════════════════════════
@@ -444,19 +502,7 @@ var SHEET_URL = 'https://docs.google.com/spreadsheets/d/15obwGmVNG5R6gxDQGmqTx2p
 // ═══════════════════════════════════════════════
 document.addEventListener('DOMContentLoaded', function() {
   loadData();
-  startCountdown();
 });
-
-function startCountdown() {
-  cdVal = 30;
-  clearInterval(cdTimer);
-  cdTimer = setInterval(function() {
-    cdVal--;
-    var el = document.getElementById('cdNum');
-    if (el) el.textContent = cdVal;
-    if (cdVal <= 0) { loadData(); cdVal = 30; }
-  }, 1000);
-}
 
 function setActive(el) {
   document.querySelectorAll('.nav-item').forEach(function(i) { i.classList.remove('active'); });
@@ -476,7 +522,6 @@ function scrollToSuggestions() {
 function loadData() {
   var icon = document.getElementById('rIcon');
   if (icon) icon.classList.add('spin');
-  cdVal = 30;
 
   google.script.run
     .withSuccessHandler(onSheetsLoaded)
@@ -511,6 +556,7 @@ function onSheetsLoaded(res) {
 }
 
 function loadSheet(name) {
+  currentSheet = name;
   google.script.run
     .withSuccessHandler(onDataLoaded)
     .withFailureHandler(onError)
@@ -536,7 +582,6 @@ function onDataLoaded(res) {
 
   renderStats();
   renderTable();
-  startCountdown();
 
   // auto-generate suggestions after a short delay
   setTimeout(generateSuggestions, 800);
@@ -552,7 +597,6 @@ function onError(err) {
     '<p class="errmsg">' + esc(String(err)) + '</p>' +
     '<button class="btn btn-ghost" onclick="loadData()" style="margin-top:12px">Try Again</button></div>';
   document.getElementById('tableInfo').textContent = 'Error';
-  startCountdown();
 }
 
 // ═══════════════════════════════════════════════
@@ -879,6 +923,147 @@ function findCol(hl, keywords) {
 
 function esc(s) {
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
+}
+
+// ═══════════════════════════════════════════════
+// ADD POST MODAL
+// ═══════════════════════════════════════════════
+
+// Fields that get special input types
+var DATE_KEYS   = ['date','planned date','post date','scheduled date','datetime'];
+var DAY_KEYS    = ['day'];
+var PLATFORM_KEYS = ['platform','channel','network','socmed','social media'];
+var STATUS_KEYS = ['status','state','published','post status'];
+var LONG_KEYS   = ['content','caption','post','text','message','description','copy','body',
+                   'plan','post angle','topic','actual','objective'];
+
+var PLATFORMS = ['Instagram/Facebook/TikTok','Instagram','Facebook','TikTok','YouTube','Twitter/X','LinkedIn'];
+var STATUSES  = ['Draft','Scheduled','Posted','For Approval'];
+var DAYS      = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+
+function openAddModal() {
+  if (!headers.length) { alert('Please wait for data to load first.'); return; }
+  buildForm();
+  document.getElementById('addOverlay').classList.add('open');
+}
+
+function closeAddModal() {
+  document.getElementById('addOverlay').classList.remove('open');
+}
+
+function handleOverlayClick(e) {
+  if (e.target === document.getElementById('addOverlay')) closeAddModal();
+}
+
+function buildForm() {
+  var hl = headers.map(function(h){ return h.toLowerCase().trim(); });
+  var html = '';
+
+  headers.forEach(function(h, i) {
+    var key = hl[i];
+    var id  = 'field_' + i;
+    var isLong     = LONG_KEYS.some(function(k){ return key.includes(k); });
+    var isDate     = DATE_KEYS.some(function(k){ return key.includes(k); });
+    var isDay      = DAY_KEYS.some(function(k){ return key === k; });
+    var isPlatform = PLATFORM_KEYS.some(function(k){ return key.includes(k); });
+    var isStatus   = STATUS_KEYS.some(function(k){ return key.includes(k); });
+
+    var fullClass = isLong ? ' full' : '';
+    html += '<div class="form-field' + fullClass + '">';
+    html += '<label class="form-label" for="' + id + '">' + esc(h) + '</label>';
+
+    if (isDate) {
+      html += '<input type="date" class="form-input" id="' + id + '" data-idx="' + i + '" onchange="autofillDay(this)">';
+    } else if (isDay) {
+      html += '<select class="form-select" id="' + id + '" data-idx="' + i + '">';
+      html += '<option value="">— Select day —</option>';
+      DAYS.forEach(function(d){ html += '<option>' + d + '</option>'; });
+      html += '</select>';
+    } else if (isPlatform) {
+      html += '<select class="form-select" id="' + id + '" data-idx="' + i + '">';
+      html += '<option value="">— Select platform —</option>';
+      PLATFORMS.forEach(function(p){ html += '<option>' + p + '</option>'; });
+      html += '</select>';
+    } else if (isStatus) {
+      html += '<select class="form-select" id="' + id + '" data-idx="' + i + '">';
+      html += '<option value="">— Select status —</option>';
+      STATUSES.forEach(function(s){ html += '<option>' + s + '</option>'; });
+      html += '</select>';
+    } else if (isLong) {
+      html += '<textarea class="form-textarea" id="' + id + '" data-idx="' + i + '" placeholder="Enter ' + esc(h.toLowerCase()) + '..."></textarea>';
+    } else {
+      html += '<input type="text" class="form-input" id="' + id + '" data-idx="' + i + '" placeholder="Enter ' + esc(h.toLowerCase()) + '...">';
+    }
+
+    html += '</div>';
+  });
+
+  document.getElementById('formFields').innerHTML = html;
+}
+
+// Auto-fill Day when a date is picked
+function autofillDay(dateInput) {
+  var val = dateInput.value;
+  if (!val) return;
+  var dayNames = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  // parse as local date to avoid timezone offset
+  var parts = val.split('-');
+  var d = new Date(parseInt(parts[0]), parseInt(parts[1])-1, parseInt(parts[2]));
+  var dayName = dayNames[d.getDay()];
+
+  // find day field and set it
+  var hl = headers.map(function(h){ return h.toLowerCase().trim(); });
+  hl.forEach(function(key, i) {
+    if (DAY_KEYS.some(function(k){ return key === k; })) {
+      var sel = document.getElementById('field_' + i);
+      if (sel) sel.value = dayName;
+    }
+  });
+
+  // also format the date display value nicely for plain text date fields if needed
+}
+
+function submitPost() {
+  var btn = document.getElementById('submitBtn');
+  var rowData = new Array(headers.length).fill('');
+
+  headers.forEach(function(h, i) {
+    var el = document.getElementById('field_' + i);
+    if (!el) return;
+    var val = el.value.trim();
+
+    // Format date fields as readable string (e.g. "May 14")
+    var key = h.toLowerCase().trim();
+    if (DATE_KEYS.some(function(k){ return key.includes(k); }) && val) {
+      var parts = val.split('-');
+      var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+      val = months[parseInt(parts[1])-1] + ' ' + parseInt(parts[2]);
+    }
+
+    rowData[i] = val;
+  });
+
+  // disable button while saving
+  btn.disabled = true;
+  btn.innerHTML = '<svg class="spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg> Saving...';
+
+  google.script.run
+    .withSuccessHandler(function(res) {
+      btn.disabled = false;
+      btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Save Post';
+      if (res.success) {
+        closeAddModal();
+        loadSheet(currentSheet); // refresh the table
+      } else {
+        alert('Error saving: ' + res.error);
+      }
+    })
+    .withFailureHandler(function(err) {
+      btn.disabled = false;
+      btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Save Post';
+      alert('Error: ' + String(err));
+    })
+    .addRow(currentSheet, rowData);
 }
 </script>
 </body>
