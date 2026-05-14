@@ -1,0 +1,885 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Social Media Admin Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Fira+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+  --bg:#07071a;
+  --bg2:#0d0d22;
+  --glass:rgba(255,255,255,0.04);
+  --glass-h:rgba(255,255,255,0.07);
+  --border:rgba(255,255,255,0.08);
+  --border-s:rgba(255,255,255,0.15);
+  --primary:#e11d48;
+  --primary-g:rgba(225,29,72,0.25);
+  --purple:#7c3aed;
+  --purple-g:rgba(124,58,237,0.25);
+  --accent:#2563eb;
+  --accent-g:rgba(37,99,235,0.25);
+  --success:#10b981;
+  --warning:#f59e0b;
+  --text:#f0f0f8;
+  --muted:#8888aa;
+  --dim:#55558a;
+  --font:'Fira Sans',system-ui,sans-serif;
+  --mono:'Fira Code',monospace;
+  --r:14px;
+  --rs:8px;
+  --t:200ms cubic-bezier(0.4,0,0.2,1);
+  --sw:240px;
+}
+
+html,body{height:100%}
+body{font-family:var(--font);background:var(--bg);color:var(--text);font-size:14px;line-height:1.5;overflow:hidden}
+
+body::before{
+  content:'';position:fixed;top:-50%;left:-50%;width:200%;height:200%;
+  background:
+    radial-gradient(ellipse at 20% 30%,rgba(124,58,237,0.09) 0%,transparent 50%),
+    radial-gradient(ellipse at 80% 70%,rgba(225,29,72,0.07) 0%,transparent 50%),
+    radial-gradient(ellipse at 55% 20%,rgba(37,99,235,0.05) 0%,transparent 45%);
+  animation:bgp 14s ease-in-out infinite alternate;
+  z-index:0;pointer-events:none;
+}
+@keyframes bgp{0%{transform:translate(0,0) scale(1)}100%{transform:translate(1.5%,1.5%) scale(1.03)}}
+
+.app{position:relative;z-index:1;display:flex;height:100vh}
+
+/* ── SIDEBAR ─────────────────────────────── */
+.sidebar{
+  width:var(--sw);min-width:var(--sw);height:100vh;
+  background:rgba(10,10,28,0.85);backdrop-filter:blur(28px);
+  border-right:1px solid var(--border);
+  display:flex;flex-direction:column;padding:20px 0;
+  position:relative;z-index:10;overflow:hidden;flex-shrink:0;
+}
+.sidebar::after{
+  content:'';position:absolute;top:0;right:0;width:1px;height:100%;
+  background:linear-gradient(to bottom,transparent,var(--primary),var(--purple),transparent);
+  opacity:0.45;
+}
+
+.logo{padding:0 20px 22px;border-bottom:1px solid var(--border);margin-bottom:14px}
+.logo-mark{
+  width:38px;height:38px;border-radius:11px;
+  background:linear-gradient(135deg,var(--primary),var(--purple));
+  display:flex;align-items:center;justify-content:center;
+  margin-bottom:12px;box-shadow:0 0 22px var(--primary-g);
+}
+.logo-mark svg{width:20px;height:20px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.logo-name{font-size:15px;font-weight:700;letter-spacing:-0.02em;
+  background:linear-gradient(135deg,#fff 40%,#aaaacc);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.logo-ver{font-size:10.5px;color:var(--muted);font-family:var(--mono);margin-top:2px}
+
+.nav{flex:1;padding:0 10px;overflow-y:auto;scrollbar-width:none}
+.nav::-webkit-scrollbar{display:none}
+.nav-label{font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--dim);padding:0 10px;margin:14px 0 5px}
+.nav-item{
+  display:flex;align-items:center;gap:9px;padding:9px 12px;border-radius:var(--rs);
+  cursor:pointer;color:var(--muted);transition:all var(--t);
+  font-size:13px;font-weight:500;margin-bottom:2px;user-select:none;
+}
+.nav-item:hover{background:var(--glass-h);color:var(--text)}
+.nav-item.active{
+  background:linear-gradient(135deg,rgba(225,29,72,0.14),rgba(124,58,237,0.1));
+  color:#fff;border:1px solid rgba(225,29,72,0.2);
+}
+.nav-item.active .ni{color:var(--primary)}
+.ni{width:15px;height:15px;flex-shrink:0;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.nbadge{margin-left:auto;font-size:10px;font-weight:700;padding:2px 6px;border-radius:20px;background:var(--primary);color:#fff;font-family:var(--mono);min-width:20px;text-align:center}
+
+.sidebar-foot{padding:14px 20px;border-top:1px solid var(--border);flex-shrink:0}
+.live-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--success);margin-right:5px;box-shadow:0 0 7px var(--success);animation:blink 2.2s ease-in-out infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.25}}
+.foot-info{font-size:10.5px;color:var(--muted);font-family:var(--mono)}
+
+/* ── MAIN ────────────────────────────────── */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
+
+/* ── HEADER ──────────────────────────────── */
+.hdr{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 24px;border-bottom:1px solid var(--border);
+  background:rgba(7,7,26,0.7);backdrop-filter:blur(24px);
+  position:relative;z-index:5;flex-shrink:0;gap:12px;
+}
+.hdr-l{display:flex;flex-direction:column;gap:2px;min-width:0}
+.hdr-title{font-size:17px;font-weight:700;letter-spacing:-0.02em;
+  background:linear-gradient(135deg,#fff 30%,#9988cc);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hdr-sub{font-size:11.5px;color:var(--muted);font-family:var(--mono);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hdr-r{display:flex;align-items:center;gap:8px;flex-shrink:0}
+
+.btn{
+  display:flex;align-items:center;gap:6px;padding:7px 13px;border-radius:var(--rs);
+  font-size:12.5px;font-weight:500;cursor:pointer;border:none;
+  transition:all var(--t);font-family:var(--font);white-space:nowrap;
+}
+.btn svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+.btn-ghost{background:var(--glass);color:var(--muted);border:1px solid var(--border)}
+.btn-ghost:hover{background:var(--glass-h);color:var(--text);border-color:var(--border-s)}
+.btn-primary{background:linear-gradient(135deg,var(--primary),var(--purple));color:#fff;box-shadow:0 0 18px var(--primary-g)}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:0 4px 22px var(--primary-g)}
+.btn-primary:active{transform:translateY(0)}
+.btn-sm{padding:5px 10px;font-size:11.5px}
+
+.countdown{font-size:11px;font-family:var(--mono);color:var(--dim);padding:4px 8px;background:var(--glass);border:1px solid var(--border);border-radius:var(--rs)}
+
+/* ── SCROLLABLE CONTENT ───────────────────── */
+.content{flex:1;overflow-y:auto;padding:18px 24px;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,0.08) transparent}
+.content::-webkit-scrollbar{width:4px}
+.content::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.1);border-radius:2px}
+
+/* ── SHEET TABS ──────────────────────────── */
+.tabs{display:flex;gap:6px;margin-bottom:18px;flex-wrap:wrap}
+.tab{
+  display:flex;align-items:center;gap:6px;padding:6px 13px;border-radius:20px;
+  border:1px solid var(--border);background:var(--glass);color:var(--muted);
+  cursor:pointer;font-size:12px;font-weight:500;transition:all var(--t);
+}
+.tab:hover{border-color:var(--border-s);color:var(--text)}
+.tab.active{background:linear-gradient(135deg,rgba(225,29,72,0.18),rgba(124,58,237,0.13));border-color:rgba(225,29,72,0.35);color:#fff}
+.tab-count{font-family:var(--mono);font-size:9.5px;padding:1px 5px;background:rgba(255,255,255,0.1);border-radius:10px}
+
+/* ── STATS GRID ──────────────────────────── */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:13px;margin-bottom:18px}
+.scard{
+  background:var(--glass);backdrop-filter:blur(24px);border:1px solid var(--border);
+  border-radius:var(--r);padding:16px;position:relative;overflow:hidden;
+  transition:all var(--t);animation:su 0.4s ease both;
+}
+@keyframes su{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+.scard:nth-child(1){animation-delay:0ms}.scard:nth-child(2){animation-delay:55ms}
+.scard:nth-child(3){animation-delay:110ms}.scard:nth-child(4){animation-delay:165ms}
+.scard:hover{background:var(--glass-h);border-color:var(--border-s);transform:translateY(-2px)}
+.scard::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;border-radius:var(--r) var(--r) 0 0}
+.scard.rose::after{background:linear-gradient(90deg,var(--primary),var(--purple))}
+.scard.grn::after{background:linear-gradient(90deg,var(--success),#34d399)}
+.scard.blu::after{background:linear-gradient(90deg,var(--accent),#06b6d4)}
+.scard.amb::after{background:linear-gradient(90deg,var(--warning),#fcd34d)}
+
+.sicon{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;margin-bottom:13px}
+.sicon svg{width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.sicon.rose{background:rgba(225,29,72,0.15);color:var(--primary)}
+.sicon.grn{background:rgba(16,185,129,0.15);color:var(--success)}
+.sicon.blu{background:rgba(37,99,235,0.15);color:var(--accent)}
+.sicon.amb{background:rgba(245,158,11,0.15);color:var(--warning)}
+.slabel{font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:0.07em;font-weight:600;margin-bottom:3px}
+.sval{font-size:26px;font-weight:700;font-family:var(--mono);letter-spacing:-0.02em;line-height:1}
+.ssub{font-size:10.5px;color:var(--muted);margin-top:4px}
+
+/* ── CONTENT GRID ────────────────────────── */
+.cgrid{display:grid;grid-template-columns:1fr 336px;gap:14px;align-items:start}
+
+/* ── PANEL ───────────────────────────────── */
+.panel{
+  background:var(--glass);backdrop-filter:blur(24px);border:1px solid var(--border);
+  border-radius:var(--r);overflow:hidden;animation:su 0.4s ease 0.2s both;
+}
+.ph{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--border);background:rgba(255,255,255,0.02);gap:10px}
+.ph-title{font-size:12.5px;font-weight:600;display:flex;align-items:center;gap:7px}
+.ph-title svg{width:13px;height:13px;stroke:var(--primary);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.ph-actions{display:flex;align-items:center;gap:7px;flex-shrink:0}
+
+.search{display:flex;align-items:center;gap:6px;padding:5px 10px;background:rgba(0,0,0,0.35);border:1px solid var(--border);border-radius:6px}
+.search svg{width:11px;height:11px;stroke:var(--muted);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+.search input{background:none;border:none;outline:none;color:var(--text);font-size:11.5px;font-family:var(--font);width:140px}
+.search input::placeholder{color:var(--dim)}
+
+/* ── TABLE ───────────────────────────────── */
+.twrap{overflow:auto;max-height:430px;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,0.08) transparent}
+.twrap::-webkit-scrollbar{width:4px;height:4px}
+.twrap::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.1);border-radius:2px}
+
+table{width:100%;border-collapse:collapse;font-size:12px}
+thead{position:sticky;top:0;z-index:2;background:rgba(7,7,26,0.97);backdrop-filter:blur(10px)}
+th{padding:9px 13px;text-align:left;font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);border-bottom:1px solid var(--border);white-space:nowrap}
+td{padding:9px 13px;border-bottom:1px solid rgba(255,255,255,0.03);color:var(--text);max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;vertical-align:middle}
+tr{transition:background var(--t)}
+tbody tr:hover td{background:rgba(255,255,255,0.025)}
+tbody tr{animation:rfi 0.25s ease both}
+@keyframes rfi{from{opacity:0;transform:translateX(-3px)}to{opacity:1;transform:translateX(0)}}
+
+/* ── BADGES ──────────────────────────────── */
+.badge{display:inline-flex;align-items:center;padding:2px 7px;border-radius:20px;font-size:10px;font-weight:600;white-space:nowrap}
+.b-posted{background:rgba(16,185,129,0.15);color:#34d399;border:1px solid rgba(16,185,129,0.2)}
+.b-sched{background:rgba(37,99,235,0.15);color:#60a5fa;border:1px solid rgba(37,99,235,0.2)}
+.b-draft{background:rgba(245,158,11,0.15);color:#fcd34d;border:1px solid rgba(245,158,11,0.2)}
+.b-fb{background:rgba(24,119,242,0.15);color:#60a5fa;border:1px solid rgba(24,119,242,0.2)}
+.b-ig{background:rgba(225,29,72,0.15);color:#fb7185;border:1px solid rgba(225,29,72,0.2)}
+.b-tw{background:rgba(255,255,255,0.07);color:#ccc;border:1px solid rgba(255,255,255,0.12)}
+.b-tt{background:rgba(0,0,0,0.35);color:#f0f0f0;border:1px solid rgba(255,255,255,0.12)}
+.b-yt{background:rgba(255,0,0,0.1);color:#ff6060;border:1px solid rgba(255,0,0,0.2)}
+.b-li{background:rgba(0,119,181,0.15);color:#60b0e4;border:1px solid rgba(0,119,181,0.2)}
+.b-def{background:rgba(255,255,255,0.06);color:var(--muted);border:1px solid var(--border)}
+
+.tfoot{display:flex;align-items:center;justify-content:space-between;padding:9px 16px;border-top:1px solid var(--border);background:rgba(255,255,255,0.01)}
+.tfoot-info{font-size:10.5px;color:var(--muted);font-family:var(--mono)}
+.pag{display:flex;gap:3px}
+.pbtn{width:27px;height:27px;border-radius:6px;border:1px solid var(--border);background:var(--glass);color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:10.5px;font-family:var(--mono);transition:all var(--t)}
+.pbtn:hover:not(:disabled){background:var(--glass-h);color:var(--text)}
+.pbtn.active{background:rgba(225,29,72,0.2);border-color:rgba(225,29,72,0.4);color:#fff}
+.pbtn:disabled{opacity:0.28;cursor:not-allowed}
+
+/* ── SUGGESTIONS ─────────────────────────── */
+.spanel{display:flex;flex-direction:column;gap:11px;animation:su 0.4s ease 0.3s both}
+.sp-hdr{background:var(--glass);backdrop-filter:blur(24px);border:1px solid var(--border);border-radius:var(--r);padding:16px}
+.sp-title{font-size:12.5px;font-weight:600;display:flex;align-items:center;gap:7px;margin-bottom:5px}
+.sp-title svg{width:13px;height:13px;stroke:var(--purple);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.sp-desc{font-size:11px;color:var(--muted);line-height:1.55;margin-bottom:11px}
+
+.sc{
+  background:var(--glass);backdrop-filter:blur(24px);border:1px solid var(--border);
+  border-radius:var(--r);padding:13px 15px;transition:all var(--t);animation:sl 0.35s ease both;
+}
+@keyframes sl{from{opacity:0;transform:translateX(14px)}to{opacity:1;transform:translateX(0)}}
+.sc:hover{background:var(--glass-h);border-color:var(--border-s);transform:translateY(-1px)}
+.sc-top{display:flex;align-items:flex-start;gap:9px;margin-bottom:7px}
+.sc-icon{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.sc-icon svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.sc-icon.rose{background:rgba(225,29,72,0.15);color:var(--primary)}
+.sc-icon.purple{background:rgba(124,58,237,0.15);color:#a78bfa}
+.sc-icon.blue{background:rgba(37,99,235,0.15);color:#60a5fa}
+.sc-icon.green{background:rgba(16,185,129,0.15);color:#34d399}
+.sc-icon.amber{background:rgba(245,158,11,0.15);color:#fcd34d}
+.sc-title{font-size:12px;font-weight:600;line-height:1.3;flex:1}
+.pri{font-size:9px;font-weight:700;padding:2px 6px;border-radius:10px;text-transform:uppercase;letter-spacing:0.05em;flex-shrink:0}
+.pri-high{background:rgba(225,29,72,0.18);color:var(--primary)}
+.pri-med{background:rgba(245,158,11,0.18);color:var(--warning)}
+.pri-low{background:rgba(16,185,129,0.18);color:var(--success)}
+.sc-body{font-size:11px;color:var(--muted);line-height:1.55}
+
+/* ── SKELETON ────────────────────────────── */
+.sk{background:linear-gradient(90deg,rgba(255,255,255,0.04) 25%,rgba(255,255,255,0.08) 50%,rgba(255,255,255,0.04) 75%);background-size:200% 100%;animation:shim 1.6s infinite;border-radius:4px}
+@keyframes shim{0%{background-position:200% 0}100%{background-position:-200% 0}}
+
+/* ── ERROR / EMPTY ───────────────────────── */
+.estate{text-align:center;padding:36px 20px}
+.estate svg{width:38px;height:38px;stroke:currentColor;fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;opacity:0.35;display:block;margin:0 auto 12px}
+.estate p{font-size:12px;color:var(--muted);margin-top:4px}
+.estate strong{display:block;font-size:13px;color:var(--text);font-weight:600}
+.estate .errmsg{font-family:var(--mono);font-size:10.5px;color:var(--primary);margin-top:6px;word-break:break-all}
+
+/* ── SPIN ────────────────────────────────── */
+.spin{animation:spin 0.9s linear infinite}
+@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+
+/* ── SCROLLBAR GLOBAL ────────────────────── */
+*{scrollbar-width:thin;scrollbar-color:rgba(255,255,255,0.07) transparent}
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- ════════════════ SIDEBAR ════════════════ -->
+<aside class="sidebar">
+  <div class="logo">
+    <div class="logo-mark">
+      <svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+    </div>
+    <div class="logo-name">SocMed Admin</div>
+    <div class="logo-ver">v1.0 · Live Dashboard</div>
+  </div>
+
+  <nav class="nav">
+    <div class="nav-label">Main</div>
+    <div class="nav-item active" onclick="setActive(this)">
+      <svg class="ni" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+      Dashboard
+    </div>
+    <div class="nav-item" onclick="setActive(this)">
+      <svg class="ni" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+      All Posts
+      <span class="nbadge" id="totalBadge">—</span>
+    </div>
+
+    <div class="nav-label">Tools</div>
+    <div class="nav-item" onclick="setActive(this);scrollToSuggestions()">
+      <svg class="ni" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+      Suggestions
+    </div>
+    <div class="nav-item" onclick="setActive(this);openSheet()">
+      <svg class="ni" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+      Open Sheet
+    </div>
+    <div class="nav-item" onclick="setActive(this);loadData()">
+      <svg class="ni" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+      Refresh Data
+    </div>
+  </nav>
+
+  <div class="sidebar-foot">
+    <div class="foot-info"><span class="live-dot"></span>Live · Google Sheets</div>
+    <div class="foot-info" style="margin-top:4px" id="lastUpdated">—</div>
+  </div>
+</aside>
+
+<!-- ════════════════ MAIN ════════════════ -->
+<main class="main">
+
+  <!-- HEADER -->
+  <div class="hdr">
+    <div class="hdr-l">
+      <div class="hdr-title">Social Media Dashboard</div>
+      <div class="hdr-sub" id="sheetTitle">Connecting to Google Sheets...</div>
+    </div>
+    <div class="hdr-r">
+      <div class="countdown">Refresh in <span id="cdNum">30</span>s</div>
+      <button class="btn btn-ghost btn-sm" onclick="loadData()">
+        <svg id="rIcon" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+        Refresh
+      </button>
+      <button class="btn btn-primary btn-sm" onclick="openSheet()">
+        <svg viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+        Open Sheet
+      </button>
+    </div>
+  </div>
+
+  <!-- CONTENT -->
+  <div class="content" id="mainContent">
+
+    <!-- SHEET TABS -->
+    <div class="tabs" id="tabs">
+      <div class="tab sk" style="width:80px;height:30px;border-radius:20px"></div>
+      <div class="tab sk" style="width:65px;height:30px;border-radius:20px"></div>
+    </div>
+
+    <!-- STATS -->
+    <div class="stats" id="stats">
+      <div class="scard rose"><div class="sicon rose"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div><div class="slabel">Total Posts</div><div class="sval sk" style="width:55px;height:26px;margin:3px 0"> </div><div class="ssub">All records</div></div>
+      <div class="scard grn"><div class="sicon grn"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div><div class="slabel">Posted</div><div class="sval sk" style="width:45px;height:26px;margin:3px 0"> </div><div class="ssub">Published</div></div>
+      <div class="scard blu"><div class="sicon blu"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div><div class="slabel">Scheduled</div><div class="sval sk" style="width:45px;height:26px;margin:3px 0"> </div><div class="ssub">Upcoming</div></div>
+      <div class="scard amb"><div class="sicon amb"><svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></div><div class="slabel">Drafts</div><div class="sval sk" style="width:45px;height:26px;margin:3px 0"> </div><div class="ssub">In progress</div></div>
+    </div>
+
+    <!-- DATA + SUGGESTIONS GRID -->
+    <div class="cgrid">
+
+      <!-- DATA TABLE -->
+      <div class="panel">
+        <div class="ph">
+          <div class="ph-title">
+            <svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+            Posts Data
+          </div>
+          <div class="ph-actions">
+            <div class="search">
+              <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <input type="text" id="searchInput" placeholder="Search posts..." oninput="filterTable()">
+            </div>
+          </div>
+        </div>
+        <div class="twrap" id="tableWrap">
+          <div id="tableContent">
+            <!-- skeleton -->
+            <div style="padding:14px">
+              <div style="display:flex;gap:10px;margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid rgba(255,255,255,0.04)">
+                <div class="sk" style="height:9px;width:13%"></div><div class="sk" style="height:9px;width:20%"></div><div class="sk" style="height:9px;width:32%"></div><div class="sk" style="height:9px;width:14%"></div>
+              </div>
+              <div style="display:flex;gap:10px;margin-bottom:8px"><div class="sk" style="height:13px;width:11%"></div><div class="sk" style="height:13px;width:21%"></div><div class="sk" style="height:13px;width:36%"></div><div class="sk" style="height:13px;width:13%"></div></div>
+              <div style="display:flex;gap:10px;margin-bottom:8px"><div class="sk" style="height:13px;width:14%"></div><div class="sk" style="height:13px;width:18%"></div><div class="sk" style="height:13px;width:30%"></div><div class="sk" style="height:13px;width:16%"></div></div>
+              <div style="display:flex;gap:10px;margin-bottom:8px"><div class="sk" style="height:13px;width:10%"></div><div class="sk" style="height:13px;width:24%"></div><div class="sk" style="height:13px;width:38%"></div><div class="sk" style="height:13px;width:11%"></div></div>
+              <div style="display:flex;gap:10px;margin-bottom:8px"><div class="sk" style="height:13px;width:12%"></div><div class="sk" style="height:13px;width:19%"></div><div class="sk" style="height:13px;width:33%"></div><div class="sk" style="height:13px;width:15%"></div></div>
+              <div style="display:flex;gap:10px;margin-bottom:8px"><div class="sk" style="height:13px;width:13%"></div><div class="sk" style="height:13px;width:22%"></div><div class="sk" style="height:13px;width:29%"></div><div class="sk" style="height:13px;width:17%"></div></div>
+              <div style="display:flex;gap:10px;margin-bottom:8px"><div class="sk" style="height:13px;width:9%"></div><div class="sk" style="height:13px;width:20%"></div><div class="sk" style="height:13px;width:37%"></div><div class="sk" style="height:13px;width:12%"></div></div>
+              <div style="display:flex;gap:10px"><div class="sk" style="height:13px;width:11%"></div><div class="sk" style="height:13px;width:23%"></div><div class="sk" style="height:13px;width:34%"></div><div class="sk" style="height:13px;width:14%"></div></div>
+            </div>
+          </div>
+        </div>
+        <div class="tfoot">
+          <div class="tfoot-info" id="tableInfo">Loading...</div>
+          <div class="pag" id="pag"></div>
+        </div>
+      </div>
+
+      <!-- SUGGESTIONS -->
+      <div class="spanel" id="spanel">
+        <div class="sp-hdr">
+          <div class="sp-title">
+            <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            Post Suggestions
+          </div>
+          <div class="sp-desc">Smart recommendations generated from your spreadsheet data to help grow your social media reach.</div>
+          <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="generateSuggestions()">
+            <svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            Generate Suggestions
+          </button>
+        </div>
+        <div id="scards">
+          <div class="sc">
+            <div class="estate">
+              <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+              <strong>Ready to analyze</strong>
+              <p>Click "Generate Suggestions" after data loads to get AI-powered post recommendations.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /cgrid -->
+  </div><!-- /content -->
+</main>
+</div><!-- /app -->
+
+<script>
+// ═══════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════
+var headers = [], rows = [], filtered = [], curPage = 1, PAGE = 20;
+var cdVal = 30, cdTimer = null;
+var SHEET_URL = 'https://docs.google.com/spreadsheets/d/15obwGmVNG5R6gxDQGmqTx2p2tiEoSiPWhe02EeCDctI/edit';
+
+// ═══════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', function() {
+  loadData();
+  startCountdown();
+});
+
+function startCountdown() {
+  cdVal = 30;
+  clearInterval(cdTimer);
+  cdTimer = setInterval(function() {
+    cdVal--;
+    var el = document.getElementById('cdNum');
+    if (el) el.textContent = cdVal;
+    if (cdVal <= 0) { loadData(); cdVal = 30; }
+  }, 1000);
+}
+
+function setActive(el) {
+  document.querySelectorAll('.nav-item').forEach(function(i) { i.classList.remove('active'); });
+  el.classList.add('active');
+}
+
+function openSheet() { window.open(SHEET_URL, '_blank'); }
+
+function scrollToSuggestions() {
+  var el = document.getElementById('spanel');
+  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// ═══════════════════════════════════════════════
+// DATA LOADING
+// ═══════════════════════════════════════════════
+function loadData() {
+  var icon = document.getElementById('rIcon');
+  if (icon) icon.classList.add('spin');
+  cdVal = 30;
+
+  google.script.run
+    .withSuccessHandler(onSheetsLoaded)
+    .withFailureHandler(onError)
+    .getAllSheets();
+}
+
+function onSheetsLoaded(res) {
+  if (!res.success) { onError(res.error); return; }
+
+  var tabsEl = document.getElementById('tabs');
+  tabsEl.innerHTML = '';
+  res.sheets.forEach(function(s, i) {
+    var tab = document.createElement('div');
+    tab.className = 'tab' + (i === 0 ? ' active' : '');
+    tab.innerHTML = esc(s.name) + ' <span class="tab-count">' + s.rowCount + '</span>';
+    tab.onclick = (function(name, t) {
+      return function() {
+        document.querySelectorAll('.tab').forEach(function(x) { x.classList.remove('active'); });
+        t.classList.add('active');
+        loadSheet(name);
+      };
+    })(s.name, tab);
+    tabsEl.appendChild(tab);
+  });
+
+  var title = document.getElementById('sheetTitle');
+  if (title) title.textContent = res.title || 'Social Media Spreadsheet';
+
+  if (res.sheets.length > 0) loadSheet(res.sheets[0].name);
+  else onError('No sheets found in the spreadsheet.');
+}
+
+function loadSheet(name) {
+  google.script.run
+    .withSuccessHandler(onDataLoaded)
+    .withFailureHandler(onError)
+    .getSheetData(name);
+}
+
+function onDataLoaded(res) {
+  var icon = document.getElementById('rIcon');
+  if (icon) icon.classList.remove('spin');
+
+  if (!res.success) { onError(res.error); return; }
+
+  headers = res.headers || [];
+  rows = res.rows || [];
+  filtered = rows.slice();
+  curPage = 1;
+
+  var lu = document.getElementById('lastUpdated');
+  if (lu) lu.textContent = res.lastUpdated || '';
+
+  var tb = document.getElementById('totalBadge');
+  if (tb) tb.textContent = rows.length;
+
+  renderStats();
+  renderTable();
+  startCountdown();
+
+  // auto-generate suggestions after a short delay
+  setTimeout(generateSuggestions, 800);
+}
+
+function onError(err) {
+  var icon = document.getElementById('rIcon');
+  if (icon) icon.classList.remove('spin');
+  document.getElementById('tableContent').innerHTML =
+    '<div class="estate"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/>' +
+    '<line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>' +
+    '<strong>Failed to load data</strong>' +
+    '<p class="errmsg">' + esc(String(err)) + '</p>' +
+    '<button class="btn btn-ghost" onclick="loadData()" style="margin-top:12px">Try Again</button></div>';
+  document.getElementById('tableInfo').textContent = 'Error';
+  startCountdown();
+}
+
+// ═══════════════════════════════════════════════
+// STATS
+// ═══════════════════════════════════════════════
+function renderStats() {
+  var hl = headers.map(function(h) { return h.toLowerCase(); });
+  var si = findCol(hl, ['status','state','published','post status']);
+  var posted = 0, sched = 0, drafts = 0;
+
+  rows.forEach(function(r) {
+    if (si < 0) return;
+    var s = (r[si] || '').toString().toLowerCase().trim();
+    if (s.match(/post|done|publish|live/)) posted++;
+    else if (s.match(/sched/)) sched++;
+    else if (s.match(/draft|pending|wip/)) drafts++;
+  });
+
+  var g = document.getElementById('stats');
+  g.innerHTML =
+    mkStat('rose','<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>','Total Posts','All records','sv-total') +
+    mkStat('grn','<polyline points="20 6 9 17 4 12"/>','Posted','Published','sv-posted') +
+    mkStat('blu','<rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>','Scheduled','Upcoming','sv-sched') +
+    mkStat('amb','<path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>','Drafts','In progress','sv-drafts');
+
+  animCount('sv-total', rows.length);
+  animCount('sv-posted', posted);
+  animCount('sv-sched', sched);
+  animCount('sv-drafts', drafts);
+}
+
+function mkStat(color, path, label, sub, id) {
+  return '<div class="scard ' + color + '">' +
+    '<div class="sicon ' + color + '"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + path + '</svg></div>' +
+    '<div class="slabel">' + label + '</div>' +
+    '<div class="sval" id="' + id + '">0</div>' +
+    '<div class="ssub">' + sub + '</div>' +
+    '</div>';
+}
+
+function animCount(id, target) {
+  var el = document.getElementById(id);
+  if (!el) return;
+  var cur = 0, step = Math.max(1, Math.ceil(target / 28));
+  var t = setInterval(function() {
+    cur = Math.min(cur + step, target);
+    el.textContent = cur.toLocaleString();
+    if (cur >= target) clearInterval(t);
+  }, 28);
+}
+
+// ═══════════════════════════════════════════════
+// TABLE
+// ═══════════════════════════════════════════════
+function renderTable() {
+  if (!headers.length) {
+    document.getElementById('tableContent').innerHTML =
+      '<div class="estate"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg><strong>No data</strong><p>This sheet appears to be empty.</p></div>';
+    document.getElementById('tableInfo').textContent = '0 rows';
+    document.getElementById('pag').innerHTML = '';
+    return;
+  }
+
+  var hl = headers.map(function(h) { return h.toLowerCase(); });
+  var si = findCol(hl, ['status','state','published','post status']);
+  var pi = findCol(hl, ['platform','channel','network','social media','socmed']);
+
+  var start = (curPage - 1) * PAGE;
+  var end = start + PAGE;
+  var pageRows = filtered.slice(start, end);
+
+  var html = '<table><thead><tr>';
+  headers.forEach(function(h) { html += '<th>' + esc(h) + '</th>'; });
+  html += '</tr></thead><tbody>';
+
+  if (!pageRows.length) {
+    html += '<tr><td colspan="' + headers.length + '" style="text-align:center;padding:28px;color:var(--muted)">No matching records</td></tr>';
+  } else {
+    pageRows.forEach(function(row, ri) {
+      html += '<tr style="animation-delay:' + (ri * 18) + 'ms">';
+      row.forEach(function(cell, ci) {
+        var val = String(cell);
+        var content = esc(val);
+        if (ci === si && val.trim()) {
+          var s = val.toLowerCase().trim();
+          var cls = s.match(/post|done|publish|live/) ? 'b-posted' :
+                    s.match(/sched/) ? 'b-sched' :
+                    s.match(/draft|pending|wip/) ? 'b-draft' : 'b-def';
+          content = '<span class="badge ' + cls + '">' + esc(val) + '</span>';
+        } else if (ci === pi && val.trim()) {
+          var p = val.toLowerCase().trim();
+          var cls = p.match(/facebook|fb/) ? 'b-fb' :
+                    p.match(/instagram|ig/) ? 'b-ig' :
+                    p.match(/twitter|^x$/) ? 'b-tw' :
+                    p.match(/tiktok/) ? 'b-tt' :
+                    p.match(/youtube|yt/) ? 'b-yt' :
+                    p.match(/linkedin/) ? 'b-li' : 'b-def';
+          content = '<span class="badge ' + cls + '">' + esc(val) + '</span>';
+        }
+        html += '<td title="' + esc(val) + '">' + content + '</td>';
+      });
+      html += '</tr>';
+    });
+  }
+  html += '</tbody></table>';
+
+  document.getElementById('tableContent').innerHTML = html;
+
+  var total = filtered.length;
+  document.getElementById('tableInfo').textContent =
+    'Showing ' + Math.min(start + 1, total) + '–' + Math.min(end, total) + ' of ' + total + ' records';
+
+  renderPag();
+}
+
+function renderPag() {
+  var total = Math.ceil(filtered.length / PAGE);
+  var el = document.getElementById('pag');
+  if (total <= 1) { el.innerHTML = ''; return; }
+
+  var html = '<button class="pbtn" onclick="goPage(' + (curPage - 1) + ')"' + (curPage <= 1 ? ' disabled' : '') + '>&#8249;</button>';
+  for (var p = 1; p <= total; p++) {
+    if (p === 1 || p === total || Math.abs(p - curPage) <= 1) {
+      html += '<button class="pbtn' + (p === curPage ? ' active' : '') + '" onclick="goPage(' + p + ')">' + p + '</button>';
+    } else if (Math.abs(p - curPage) === 2) {
+      html += '<button class="pbtn" disabled>…</button>';
+    }
+  }
+  html += '<button class="pbtn" onclick="goPage(' + (curPage + 1) + ')"' + (curPage >= total ? ' disabled' : '') + '>&#8250;</button>';
+  el.innerHTML = html;
+}
+
+function goPage(p) {
+  var total = Math.ceil(filtered.length / PAGE);
+  if (p < 1 || p > total) return;
+  curPage = p;
+  renderTable();
+  document.getElementById('tableWrap').scrollTop = 0;
+}
+
+function filterTable() {
+  var q = document.getElementById('searchInput').value.toLowerCase();
+  filtered = q ? rows.filter(function(r) { return r.some(function(c) { return String(c).toLowerCase().includes(q); }); }) : rows.slice();
+  curPage = 1;
+  renderTable();
+}
+
+// ═══════════════════════════════════════════════
+// SUGGESTIONS ENGINE
+// ═══════════════════════════════════════════════
+function generateSuggestions() {
+  if (!rows.length) {
+    document.getElementById('scards').innerHTML =
+      '<div class="sc"><div class="estate"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><strong>No data yet</strong><p>Please wait for the sheet to load first.</p></div></div>';
+    return;
+  }
+  var suggs = analyze(headers, rows);
+  renderSuggestions(suggs);
+}
+
+function analyze(hdrs, rws) {
+  var suggs = [];
+  var hl = hdrs.map(function(h) { return h.toLowerCase(); });
+  var pi = findCol(hl, ['platform','channel','network','social media','socmed']);
+  var di = findCol(hl, ['date','post date','posted','scheduled date','datetime','schedule']);
+  var si = findCol(hl, ['status','state','published','post status']);
+  var hi = findCol(hl, ['hashtags','tags','hash','#tags','#']);
+  var ci = findCol(hl, ['content','caption','post','text','message','description','copy','body']);
+
+  // 1. Platform analysis
+  if (pi >= 0) {
+    var pc = {};
+    rws.forEach(function(r) { var v = (r[pi]||'').toString().trim(); if (v) pc[v] = (pc[v]||0)+1; });
+    var sorted = Object.entries(pc).sort(function(a,b){return b[1]-a[1];});
+    if (sorted.length) {
+      var top = sorted[0], pct = Math.round(top[1]/rws.length*100);
+      suggs.push({ icon:'target', color:'rose', pri:'high',
+        title: top[0] + ' Dominates (' + pct + '%)',
+        body: top[0] + ' has ' + top[1] + ' of your ' + rws.length + ' posts (' + pct + '%). ' +
+          (sorted.length > 1 ? 'Balance it with ' + sorted[1][0] + ' (' + sorted[1][1] + ' posts) to diversify reach and protect against algorithm changes.' : 'Consider expanding to 1–2 more platforms to reach new audiences.') });
+      if (sorted.length > 1) {
+        var under = sorted[sorted.length - 1];
+        suggs.push({ icon:'trending', color:'blue', pri:'medium',
+          title: 'Boost ' + under[0] + ' — ' + under[1] + ' Post' + (under[1] > 1 ? 's' : ''),
+          body: under[0] + ' is your least-used channel. Cross-post your best-performing content here to grow it quickly without extra creative effort.' });
+      }
+    }
+  }
+
+  // 2. Status pipeline
+  if (si >= 0) {
+    var sc = { draft:0, sched:0, posted:0 };
+    rws.forEach(function(r) {
+      var s = (r[si]||'').toString().toLowerCase().trim();
+      if (s.match(/post|done|publish|live/)) sc.posted++;
+      else if (s.match(/sched/)) sc.sched++;
+      else if (s.match(/draft|pending|wip/)) sc.draft++;
+    });
+    if (sc.draft > 1)
+      suggs.push({ icon:'edit', color:'amber', pri:'high',
+        title: sc.draft + ' Drafts Waiting to Publish',
+        body: 'You have ' + sc.draft + ' unpublished drafts. Schedule 1–2 per day over the next ' + Math.ceil(sc.draft/2) + ' days to maintain a consistent posting cadence — the #1 driver of organic growth.' });
+    if (sc.sched > 0)
+      suggs.push({ icon:'clock', color:'blue', pri:'low',
+        title: sc.sched + ' Scheduled Post' + (sc.sched > 1 ? 's' : '') + ' Coming Up',
+        body: 'Good pipeline! Review your ' + sc.sched + ' scheduled posts now — ensure captions are still timely, images are correct, and links work before they go live.' });
+    if (sc.posted > 0 && rws.length > 0) {
+      var rate = Math.round(sc.posted / rws.length * 100);
+      if (rate < 40)
+        suggs.push({ icon:'zap', color:'rose', pri:'high',
+          title: 'Only ' + rate + '% of Posts Are Live',
+          body: 'Your publish rate is low. Set a daily "posting window" (e.g., 9:00 AM) and commit to publishing at least 1 post each day until your backlog clears.' });
+    }
+  }
+
+  // 3. Best posting day
+  if (di >= 0) {
+    var days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+    var dc = {};
+    var parsed = 0;
+    rws.forEach(function(r) {
+      var raw = r[di];
+      if (!raw) return;
+      var d = new Date(raw);
+      if (!isNaN(d.getTime())) { dc[days[d.getDay()]] = (dc[days[d.getDay()]]||0)+1; parsed++; }
+    });
+    if (parsed > 3) {
+      var ds = Object.entries(dc).sort(function(a,b){return b[1]-a[1];});
+      var best = ds[0], worst = ds[ds.length-1];
+      suggs.push({ icon:'calendar', color:'purple', pri:'medium',
+        title: best[0] + ' is Your Power Day',
+        body: best[0] + ' has the most posts (' + best[1] + '). Schedule your key content — launches, promotions, campaigns — on ' + best[0] + 's. ' +
+          (worst && worst[0] !== best[0] ? worst[0] + ' is underused (' + worst[1] + ' post' + (worst[1]>1?'s':'')+') — add 1 post there weekly.' : '') });
+    }
+  }
+
+  // 4. Hashtag analysis
+  if (hi >= 0) {
+    var hc = {};
+    rws.forEach(function(r) {
+      var raw = (r[hi]||'').toString();
+      if (!raw.trim()) return;
+      var tags = (raw.match(/#\w+/g)||[]);
+      if (!tags.length) tags = raw.split(/[,\s]+/).filter(function(t){return t.trim();}).map(function(t){return t.startsWith('#')?t:'#'+t;});
+      tags.forEach(function(t){ var k=t.toLowerCase().trim(); if(k.length>2) hc[k]=(hc[k]||0)+1; });
+    });
+    var hs = Object.entries(hc).sort(function(a,b){return b[1]-a[1];}).slice(0,5);
+    if (hs.length >= 2)
+      suggs.push({ icon:'hash', color:'purple', pri:'medium',
+        title: 'Your Power Hashtags',
+        body: 'Most used: ' + hs.map(function(x){return x[0]+' (×'+x[1]+')';}).join(', ') + '. Use 5–10 per post. Rotate monthly to avoid shadowbanning and mix brand tags with trending ones.' });
+    else
+      suggs.push({ icon:'hash', color:'amber', pri:'medium',
+        title: 'Add a Hashtags Column',
+        body: 'Track hashtags in your spreadsheet to analyze which tags drive the most reach. Target niche hashtags (10K–500K posts) — they outperform oversaturated mega-tags.' });
+  } else {
+    suggs.push({ icon:'hash', color:'amber', pri:'medium',
+      title: 'Start Tracking Hashtags',
+      body: 'Add a "Hashtags" column to your sheet. Consistent hashtag tracking lets you A/B test tag sets and identify which ones earn the most saves, shares, and new followers.' });
+  }
+
+  // 5. Caption length tip
+  if (ci >= 0) {
+    var lens = rws.map(function(r){return (r[ci]||'').toString().length;}).filter(function(l){return l>0;});
+    if (lens.length) {
+      var avg = Math.round(lens.reduce(function(a,b){return a+b;},0)/lens.length);
+      suggs.push({ icon:'edit', color:'green', pri:'low',
+        title: 'Caption Avg: ' + avg + ' chars',
+        body: avg < 60 ? 'Your captions are short. Add a hook line, 2–3 context sentences, and a CTA question to boost saves and comments. Aim for 100–200 chars for Reels, 200–500 for Facebook.' :
+              avg > 400 ? 'Your captions run long. Try the "hook + value + CTA" format in under 200 chars for Instagram/TikTok. Save long-form for LinkedIn and Facebook carousels.' :
+              'Caption length is well-balanced! Keep testing hooks — start with a question or bold claim. First 2 lines determine if users tap "more."' });
+    }
+  }
+
+  // 6. Always-on tips (localized to PH)
+  suggs.push({ icon:'clock', color:'blue', pri:'low',
+    title: 'Peak Times (Philippines)',
+    body: 'Best windows: 12PM–2PM (lunch), 6PM–8:30PM (after work), 9PM–11PM (prime time). Schedule 10–15 mins before peak to catch the early wave of the algorithm boost.' });
+
+  suggs.push({ icon:'trending', color:'green', pri:'low',
+    title: '3-1-3 Content Mix Rule',
+    body: 'For every 3 educational posts → 1 personal/behind-the-scenes → 3 entertaining posts. This ratio builds trust and avoids audience fatigue from overly promotional content.' });
+
+  return suggs.slice(0, 8);
+}
+
+function renderSuggestions(suggs) {
+  var ICONS = {
+    target: '<path d="M22 12h-4l-3 9L9 3l-3 9H2"/>',
+    trending: '<polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/>',
+    calendar: '<rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>',
+    edit: '<path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>',
+    hash: '<line x1="4" y1="9" x2="20" y2="9"/><line x1="4" y1="15" x2="20" y2="15"/><line x1="10" y1="3" x2="8" y2="21"/><line x1="16" y1="3" x2="14" y2="21"/>',
+    zap: '<polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>',
+    clock: '<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>'
+  };
+  var html = suggs.map(function(s, i) {
+    var ico = ICONS[s.icon] || ICONS.zap;
+    var priCls = s.pri === 'high' ? 'pri-high' : s.pri === 'medium' ? 'pri-med' : 'pri-low';
+    return '<div class="sc" style="animation-delay:' + (i*55) + 'ms">' +
+      '<div class="sc-top">' +
+        '<div class="sc-icon ' + s.color + '"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + ico + '</svg></div>' +
+        '<div class="sc-title">' + esc(s.title) + '</div>' +
+        '<span class="pri ' + priCls + '">' + s.pri + '</span>' +
+      '</div>' +
+      '<div class="sc-body">' + esc(s.body) + '</div>' +
+      '</div>';
+  }).join('');
+  document.getElementById('scards').innerHTML = html ||
+    '<div class="sc"><div class="estate"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/></svg><strong>No suggestions</strong><p>Not enough data to analyze yet.</p></div></div>';
+}
+
+// ═══════════════════════════════════════════════
+// UTILS
+// ═══════════════════════════════════════════════
+function findCol(hl, keywords) {
+  for (var k = 0; k < keywords.length; k++) {
+    for (var h = 0; h < hl.length; h++) {
+      if (hl[h].includes(keywords[k])) return h;
+    }
+  }
+  return -1;
+}
+
+function esc(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
+}
+</script>
+</body>
+</html>
